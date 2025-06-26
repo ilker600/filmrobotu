@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Film Robotu - İLKER AKSOY</title>
+  <style>
+    /* Reset & basic */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0; background-color: #121212; color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    h1 {
+      padding: 1rem;
+      margin: 0;
+      font-weight: 700;
+      border-bottom: 2px solid #b71c1c;
+      background-color: #1f1f1f;
+      color: #ff3d00;
+      user-select: none;
+    }
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 1rem auto 3rem;
+      padding: 0 1rem;
+    }
+
+    /* Filters */
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .filters select {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      background-color: #222;
+      border: none;
+      color: #eee;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .filters select:hover, .filters select:focus {
+      background-color: #333;
+      outline: none;
+    }
+
+    /* Film grid */
+    .film-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(160px,1fr));
+      gap: 1rem;
+    }
+    .film-card {
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 6px #000;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      transition: transform 0.2s ease;
+    }
+    .film-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 16px #b71c1caa;
+      cursor: pointer;
+    }
+    .film-thumb {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      background-color: #444;
+    }
+    .film-info {
+      padding: 0.5rem 0.75rem 1rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .film-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 0.25rem 0;
+      color: #ff5722;
+    }
+    .film-year {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+    .film-rating {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      color: #ffd54f;
+      user-select: none;
+    }
+    .film-rating svg {
+      width: 16px; height: 16px; fill: currentColor;
+    }
+  </style>
+</head>
+<body>
+  <h1>Film Robotu - İLKER AKSOY</h1>
+  <div class="container">
+    <section class="filters" aria-label="Film filtreleri">
+      <select id="filter-genre" aria-label="Film türü seçiniz">
+        <option value="all" selected>Tüm Türler</option>
+        <option value="dram">Dram</option>
+        <option value="aksiyon">Aksiyon</option>
+        <option value="bilimkurgu">Bilim Kurgu</option>
+        <option value="komedi">Komedi</option>
+        <option value="gerilim">Gerilim</option>
+        <option value="fantastik">Fantastik</option>
+        <option value="animasyon">Animasyon</option>
+        <option value="suç">Suç</option>
+        <option value="romantik">Romantik</option>
+      </select>
+
+      <select id="filter-year" aria-label="Film yılı seçiniz">
+        <option value="all" selected>Tüm Yıllar</option>
+        <option value="2020s">2020 - 2023</option>
+        <option value="2010s">2010 - 2019</option>
+        <option value="2000s">2000 - 2009</option>
+        <option value="1990s">1990 - 1999</option>
+        <option value="1980s">1980 - 1989</option>
+        <option value="1970s">1970 - 1979</option>
+        <option value="1960s">1960 - 1969</option>
+        <option value="older">1960 Öncesi</option>
+      </select>
+
+      <select id="filter-rating" aria-label="IMDb puanı seçiniz">
+        <option value="all" selected>Tüm IMDb Puanları</option>
+        <option value="9">9 ve üzeri</option>
+        <option value="8">8 ve üzeri</option>
+        <option value="7">7 ve üzeri</option>
+      </select>
+
+      <select id="filter-language" aria-label="Film dili seçiniz">
+        <option value="all" selected>Tüm Diller</option>
+        <option value="english">İngilizce</option>
+        <option value="turkish">Türkçe</option>
+        <option value="french">Fransızca</option>
+        <option value="japanese">Japonca</option>
+        <option value="hindi">Hintçe</option>
+        <option value="korean">Korece</option>
+        <option value="chinese">Çince</option>
+      </select>
+
+      <select id="filter-sort" aria-label="Sıralama seçiniz">
+        <option value="imdb-desc" selected>IMDb Puanına Göre Azalan</option>
+        <option value="imdb-asc">IMDb Puanına Göre Artan</option>
+        <option value="year-desc">Yıla Göre Azalan</option>
+        <option value="year-asc">Yıla Göre Artan</option>
+        <option value="title-asc">İsme Göre A-Z</option>
+        <option value="title-desc">İsme Göre Z-A</option>
+      </select>
+    </section>
+
+    <section class="film-grid" role="list" aria-label="Film listesi" id="film-list">
+      <!-- Film kartları JS ile gelecek -->
+    </section>
+  </div>
+
+  <script>
+    const films = [
+      {id:1,title:"The Shawshank Redemption",year:1994,genre:"dram",imdb:9.3,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Shawshank+Redemption",
+       alt:"The Shawshank Redemption film afişi, iki adam, karanlık tonlarda bir hapishane arkası"},
+      {id:2,title:"The Godfather",year:1972,genre:"suç",imdb:9.2,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Godfather",
+       alt:"The Godfather film posteri, siyah takım elbiseli adam elinde kediyle"},
+      {id:3,title:"The Dark Knight",year:2008,genre:"aksiyon",imdb:9.0,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Dark+Knight",
+       alt:"The Dark Knight film posteri, Batman figürü gece şehri önünde"},
+      {id:4,title:"12 Angry Men",year:1957,genre:"dram",imdb:8.9,lang:"english",
+       image:"https://placehold.co/320x480?text=12+Angry+Men",
+       alt:"12 Angry Men film afişi, jüri üyeleri büyük masada tartışıyor"},
+      {id:5,title:"Schindler's List",year:1993,genre:"dram",imdb:8.9,lang:"english",
+       image:"https://placehold.co/320x480?text=Schindlers+List",
+       alt:"Schindler's List film posteri, siyah beyaz insan silüetleri"},
+      {id:6,title:"Pulp Fiction",year:1994,genre:"suç",imdb:8.9,lang:"english",
+       image:"https://placehold.co/320x480?text=Pulp+Fiction",
+       alt:"Pulp Fiction film posteri, 2 ana karakter silüeti"},
+      {id:7,title:"The Lord of the Rings",year:2003,genre:"fantastik",imdb:8.9,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Lord+of+the+Rings",
+       alt:"The Lord of the Rings film posteri, epik fantastik karakterlerle"},
+      {id:8,title:"Forrest Gump",year:1994,genre:"dram",imdb:8.8,lang:"english",
+       image:"https://placehold.co/320x480?text=Forrest+Gump",
+       alt:"Forrest Gump film posteri, Tom Hanks otobüs durağı bekliyor"},
+      {id:9,title:"Inception",year:2010,genre:"bilimkurgu",imdb:8.8,lang:"english",
+       image:"https://placehold.co/320x480?text=Inception",
+       alt:"Inception film afişi, şehir bükülen görsel"},
+      {id:10,title:"Fight Club",year:1999,genre:"dram",imdb:8.8,lang:"english",
+       image:"https://placehold.co/320x480?text=Fight+Club",
+       alt:"Fight Club film posteri, 2 erkek karakter karanlıkta"},
+
+      {id:11,title:"Interstellar",year:2014,genre:"bilimkurgu",imdb:8.6,lang:"english",
+       image:"https://placehold.co/320x480?text=Interstellar",
+       alt:"Interstellar film posteri, uzay temalı, astronot figürü"},
+      {id:12,title:"Parasite",year:2019,genre:"dram",imdb:8.6,lang:"korean",
+       image:"https://placehold.co/320x480?text=Parasite",
+       alt:"Parasite film posteri, modern ev ve gölge figürleri"},
+      {id:13,title:"Léon: The Professional",year:1994,genre:"aksiyon",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=Leon+The+Professional",
+       alt:"Léon The Professional film posteri, şapkalı adam ve genç kız"},
+      {id:14,title:"Gladiator",year:2000,genre:"aksiyon",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=Gladiator",
+       alt:"Gladiator film posteri, Roma savaşçısı elinde kılıç"},
+      {id:15,title:"The Matrix",year:1999,genre:"bilimkurgu",imdb:8.7,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Matrix",
+       alt:"The Matrix film posteri, yeşil kodlar ve karakter siyah gözlükte"},
+
+      {id:16,title:"Goodfellas",year:1990,genre:"suç",imdb:8.7,lang:"english",
+       image:"https://placehold.co/320x480?text=Goodfellas",
+       alt:"Goodfellas film posteri, gangster temalı, adamlar grup halinde"},
+      {id:17,title:"The Silence of the Lambs",year:1991,genre:"gerilim",imdb:8.6,lang:"english",
+       image:"https://placehold.co/320x480?text=Silence+of+the+Lambs",
+       alt:"The Silence of the Lambs film posteri, maske takan adam"},
+      {id:18,title:"Se7en",year:1995,genre:"gerilim",imdb:8.6,lang:"english",
+       image:"https://placehold.co/320x480?text=Se7en",
+       alt:"Se7en film posteri, karanlık, elinde yazılı yedi"},
+      {id:19,title:"The Green Mile",year:1999,genre:"dram",imdb:8.6,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Green+Mile",
+       alt:"The Green Mile film posteri, hapishane gardiyanları ve mahkum"},
+      {id:20,title:"Avengers: Endgame",year:2019,genre:"aksiyon",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Avengers+Endgame",
+       alt:"Avengers: Endgame film posteri, süper kahramanlar birlikte"},
+
+      {id:21,title:"Whiplash",year:2014,genre:"dram",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=Whiplash",
+       alt:"Whiplash film posteri, genç adam davul çalıyor"},
+      {id:22,title:"The Prestige",year:2006,genre:"dram",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Prestige",
+       alt:"The Prestige film posteri, sihirbaz ve yanındaki karakter"},
+      {id:23,title:"The Lion King",year:1994,genre:"animasyon",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Lion+King",
+       alt:"The Lion King animasyon film afişi, aslan figürü güneşli savannada"},
+      {id:24,title:"Back to the Future",year:1985,genre:"bilimkurgu",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=Back+to+the+Future",
+       alt:"Back to the Future film posteri, zaman makinesi arabayla"},
+      {id:25,title:"Spider-Man: Into the Spider-Verse",year:2018,genre:"animasyon",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Spider-Man+Into+the+Spider-Verse",
+       alt:"Spider-Man: Into the Spider-Verse animasyon karakteri örümcek adam"},
+
+      {id:26,title:"Joker",year:2019,genre:"dram",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Joker",
+       alt:"Joker film posteri, yüzü boyalı adam karanlık arka planda"},
+      {id:27,title:"Toy Story",year:1995,genre:"animasyon",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Toy+Story",
+       alt:"Toy Story animasyon film afişi, oyuncak kahramanlar"},
+      {id:28,title:"The Departed",year:2006,genre:"suç",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Departed",
+       alt:"The Departed film posteri, polis ve suçlular arasında"},
+      {id:29,title:"Coco",year:2017,genre:"animasyon",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Coco",
+       alt:"Coco animasyon filmi, renkli iskelet"},
+      {id:30,title:"Mad Max: Fury Road",year:2015,genre:"aksiyon",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Mad+Max+Fury+Road",
+       alt:"Mad Max: Fury Road film posteri, kıyamet sonrası araçlar ve tozlu arka plan"},
+
+      {id:31,title:"The Social Network",year:2010,genre:"dram",imdb:7.7,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Social+Network",
+       alt:"The Social Network film posteri, genç Mark Zuckerberg laptop başında"},
+      {id:32,title:"The Grand Budapest Hotel",year:2014,genre:"komedi",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Grand+Budapest+Hotel",
+       alt:"The Grand Budapest Hotel film posteri, pembe otel ve renkli karakterler"},
+      {id:33,title:"La La Land",year:2016,genre:"romantik",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=La+La+Land",
+       alt:"La La Land film posteri, dans eden çift gece gökyüzü altında"},
+      {id:34,title:"The Wolf of Wall Street",year:2013,genre:"dram",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Wolf+of+Wall+Street",
+       alt:"The Wolf of Wall Street film posteri, Leonardo DiCaprio zengin iş adamı olarak"},
+      {id:35,title:"Spirited Away",year:2001,genre:"animasyon",imdb:8.6,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Spirited+Away",
+       alt:"Spirited Away animasyon film posteri, kız karakter ve fantastik yaratıklar"},
+      {id:36,title:"The Intouchables",year:2011,genre:"dram",imdb:8.5,lang:"french",
+       image:"https://placehold.co/320x480?text=The+Intouchables",
+       alt:"The Intouchables film posteri, iki adamın birlikte gülümsemesi"},
+      {id:37,title:"Crouching Tiger, Hidden Dragon",year:2000,genre:"aksiyon",imdb:7.9,lang:"chinese",
+       image:"https://placehold.co/320x480?text=Crouching+Tiger+Hidden+Dragon",
+       alt:"Crouching Tiger, Hidden Dragon film posteri, dövüş sahnesi"},
+      {id:38,title:"Deadpool",year:2016,genre:"aksiyon",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Deadpool",
+       alt:"Deadpool film posteri, kırmızı kostümlü karakter"},
+      {id:39,title:"The Pianist",year:2002,genre:"dram",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Pianist",
+       alt:"The Pianist film posteri, piyano başında oturan adam"},
+      {id:40,title:"The Shining",year:1980,genre:"gerilim",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Shining",
+       alt:"The Shining film posteri, korku dolu yüz ifadesi"},
+      {id:41,title:"Casablanca",year:1942,genre:"romantik",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=Casablanca",
+       alt:"Casablanca film posteri, Humphrey Bogart ve Ingrid Bergman"},
+      {id:42,title:"Gone with the Wind",year:1939,genre:"dram",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Gone+with+the+Wind",
+       alt:"Gone with the Wind film posteri, büyük elbiseyle kadın figürü"},
+      {id:43,title:"The Usual Suspects",year:1995,genre:"suç",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Usual+Suspects",
+       alt:"The Usual Suspects film posteri, beş şüpheli karakter"},
+      {id:44,title:"The Sixth Sense",year:1999,genre:"gerilim",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Sixth+Sense",
+       alt:"The Sixth Sense film posteri, Bruce Willis ve genç çocuk"},
+      {id:45,title:"The Truman Show",year:1998,genre:"dram",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Truman+Show",
+       alt:"The Truman Show film posteri, Jim Carrey gökyüzüne bakarken"},
+      {id:46,title:"Saving Private Ryan",year:1998,genre:"dram",imdb:8.6,lang:"english",
+       image:"https://placehold.co/320x480?text=Saving+Private+Ryan",
+       alt:"Saving Private Ryan film posteri, askerler Normandiya çıkarmasında"},
+      {id:47,title:"The Godfather Part II",year:1974,genre:"suç",imdb:9.0,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Godfather+Part+II",
+       alt:"The Godfather Part II film posteri, Al Pacino otururken"},
+      {id:48,title:"One Flew Over the Cuckoo's Nest",year:1975,genre:"dram",imdb:8.7,lang:"english",
+       image:"https://placehold.co/320x480?text=One+Flew+Over+the+Cuckoos+Nest",
+       alt:"One Flew Over the Cuckoo's Nest film posteri, Jack Nicholson gülümserken"},
+      {id:49,title:"The Lord of the Rings: The Two Towers",year:2002,genre:"fantastik",imdb:8.8,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Lord+of+the+Rings+The+Two+Towers",
+       alt:"The Lord of the Rings: The Two Towers film posteri, epik savaş sahnesi"},
+      {id:50,title:"The Lord of the Rings: The Return of the King",year:2003,genre:"fantastik",imdb:8.9,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Lord+of+the+Rings+The+Return+of+the+King",
+       alt:"The Lord of the Rings: The Return of the King film posteri, Aragorn taç giyerken"},
+
+      {id:51,title:"Star Wars: Episode V - The Empire Strikes Back",year:1980,genre:"bilimkurgu",imdb:8.7,lang:"english",
+       image:"https://placehold.co/320x480?text=Star+Wars+Empire+Strikes+Back",
+       alt:"Star Wars: The Empire Strikes Back film posteri, Darth Vader ve Luke Skywalker"},
+      {id:52,title:"City of God",year:2002,genre:"suç",imdb:8.6,lang:"portuguese",
+       image:"https://placehold.co/320x480?text=City+of+God",
+       alt:"City of God film posteri, Brezilya favelasında gençler"},
+      {id:53,title:"Seven Samurai",year:1954,genre:"aksiyon",imdb:8.6,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Seven+Samurai",
+       alt:"Seven Samurai film posteri, Japon samuraylar"},
+      {id:54,title:"Life Is Beautiful",year:1997,genre:"dram",imdb:8.6,lang:"italian",
+       image:"https://placehold.co/320x480?text=Life+Is+Beautiful",
+       alt:"Life Is Beautiful film posteri, Roberto Benigni çocuğuyla"},
+      {id:55,title:"The Good, the Bad and the Ugly",year:1966,genre:"aksiyon",imdb:8.8,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Good+the+Bad+and+the+Ugly",
+       alt:"The Good, the Bad and the Ugly film posteri, üç kovboy"},
+      {id:56,title:"Once Upon a Time in the West",year:1968,genre:"aksiyon",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=Once+Upon+a+Time+in+the+West",
+       alt:"Once Upon a Time in the West film posteri, western sahnesi"},
+      {id:57,title:"Psycho",year:1960,genre:"gerilim",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=Psycho",
+       alt:"Psycho film posteri, duş sahnesi silüeti"},
+      {id:58,title:"Rear Window",year:1954,genre:"gerilim",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=Rear+Window",
+       alt:"Rear Window film posteri, James Stewart dürbünle bakarken"},
+      {id:59,title:"Vertigo",year:1958,genre:"gerilim",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Vertigo",
+       alt:"Vertigo film posteri, spiral efektli"},
+      {id:60,title:"North by Northwest",year:1959,genre:"gerilim",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=North+by+Northwest",
+       alt:"North by Northwest film posteri, Cary Grant uçaktan kaçarken"},
+
+      {id:61,title:"Alien",year:1979,genre:"bilimkurgu",imdb:8.5,lang:"english",
+       image:"https://placehold.co/320x480?text=Alien",
+       alt:"Alien film posteri, yumurtadan çıkan yaratık"},
+      {id:62,title:"Aliens",year:1986,genre:"bilimkurgu",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Aliens",
+       alt:"Aliens film posteri, Sigourney Weaver silahlı"},
+      {id:63,title:"Blade Runner",year:1982,genre:"bilimkurgu",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Blade+Runner",
+       alt:"Blade Runner film posteri, futuristik şehir manzarası"},
+      {id:64,title:"Blade Runner 2049",year:2017,genre:"bilimkurgu",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Blade+Runner+2049",
+       alt:"Blade Runner 2049 film posteri, Ryan Gosling futuristik ortamda"},
+      {id:65,title:"Terminator 2: Judgment Day",year:1991,genre:"bilimkurgu",imdb:8.6,lang:"english",
+       image:"https://placehold.co/320x480?text=Terminator+2",
+       alt:"Terminator 2 film posteri, Arnold Schwarzenegger motosikletle"},
+      {id:66,title:"The Terminator",year:1984,genre:"bilimkurgu",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Terminator",
+       alt:"The Terminator film posteri, Arnold Schwarzenegger gözlüklü"},
+      {id:67,title:"Jurassic Park",year:1993,genre:"bilimkurgu",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Jurassic+Park",
+       alt:"Jurassic Park film posteri, T-Rex ve jeep"},
+      {id:68,title:"Raiders of the Lost Ark",year:1981,genre:"aksiyon",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Raiders+of+the+Lost+Ark",
+       alt:"Raiders of the Lost Ark film posteri, Indiana Jones şapkalı"},
+      {id:69,title:"Indiana Jones and the Last Crusade",year:1989,genre:"aksiyon",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Indiana+Jones+and+the+Last+Crusade",
+       alt:"Indiana Jones and the Last Crusade film posteri, Harrison Ford ve Sean Connery"},
+      {id:70,title:"E.T. the Extra-Terrestrial",year:1982,genre:"bilimkurgu",imdb:7.9,lang:"english",
+       image:"https://placehold.co/320x480?text=E.T.",
+       alt:"E.T. film posteri, bisikletle uçan çocuklar ve E.T."},
+
+      {id:71,title:"The Wizard of Oz",year:1939,genre:"fantastik",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Wizard+of+Oz",
+       alt:"The Wizard of Oz film posteri, Dorothy ve arkadaşları"},
+      {id:72,title:"Singin' in the Rain",year:1952,genre:"komedi",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Singin+in+the+Rain",
+       alt:"Singin' in the Rain film posteri, Gene Kelly şemsiyeyle dans ederken"},
+      {id:73,title:"Some Like It Hot",year:1959,genre:"komedi",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Some+Like+It+Hot",
+       alt:"Some Like It Hot film posteri, Marilyn Monroe ve iki erkek kadın kılığında"},
+      {id:74,title:"Dr. Strangelove",year:1964,genre:"komedi",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Dr.+Strangelove",
+       alt:"Dr. Strangelove film posteri, Peter Sellers farklı karakterlerde"},
+      {id:75,title:"Monty Python and the Holy Grail",year:1975,genre:"komedi",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Monty+Python+and+the+Holy+Grail",
+       alt:"Monty Python and the Holy Grail film posteri, komik ortaçağ sahnesi"},
+      {id:76,title:"Amélie",year:2001,genre:"romantik",imdb:8.3,lang:"french",
+       image:"https://placehold.co/320x480?text=Amelie",
+       alt:"Amélie film posteri, Audrey Tautou gülümserken"},
+      {id:77,title:"Cinema Paradiso",year:1988,genre:"dram",imdb:8.5,lang:"italian",
+       image:"https://placehold.co/320x480?text=Cinema+Paradiso",
+       alt:"Cinema Paradiso film posteri, sinema salonu ve çocuk"},
+      {id:78,title:"Oldboy",year:2003,genre:"aksiyon",imdb:8.4,lang:"korean",
+       image:"https://placehold.co/320x480?text=Oldboy",
+       alt:"Oldboy film posteri, Koreli aktör Choi Min-sik"},
+      {id:79,title:"Parasite",year:2019,genre:"dram",imdb:8.6,lang:"korean",
+       image:"https://placehold.co/320x480?text=Parasite",
+       alt:"Parasite film posteri, modern ev ve gölge figürleri"},
+      {id:80,title:"Memories of Murder",year:2003,genre:"suç",imdb:8.1,lang:"korean",
+       image:"https://placehold.co/320x480?text=Memories+of+Murder",
+       alt:"Memories of Murder film posteri, Koreli dedektifler"},
+
+      {id:81,title:"A Separation",year:2011,genre:"dram",imdb:8.3,lang:"persian",
+       image:"https://placehold.co/320x480?text=A+Separation",
+       alt:"A Separation film posteri, İranlı aile dramı"},
+      {id:82,title:"Rashomon",year:1950,genre:"dram",imdb:8.2,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Rashomon",
+       alt:"Rashomon film posteri, samuray ve kadın"},
+      {id:83,title:"Yojimbo",year:1961,genre:"aksiyon",imdb:8.2,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Yojimbo",
+       alt:"Yojimbo film posteri, samuray kılıçlı"},
+      {id:84,title:"Ran",year:1985,genre:"aksiyon",imdb:8.2,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Ran",
+       alt:"Ran film posteri, savaş sahnesi"},
+      {id:85,title:"Spirited Away",year:2001,genre:"animasyon",imdb:8.6,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Spirited+Away",
+       alt:"Spirited Away animasyon film posteri, kız karakter ve fantastik yaratıklar"},
+      {id:86,title:"Princess Mononoke",year:1997,genre:"animasyon",imdb:8.4,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Princess+Mononoke",
+       alt:"Princess Mononoke animasyon film posteri, orman tanrıları ve savaş"},
+      {id:87,title:"My Neighbor Totoro",year:1988,genre:"animasyon",imdb:8.2,lang:"japanese",
+       image:"https://placehold.co/320x480?text=My+Neighbor+Totoro",
+       alt:"My Neighbor Totoro animasyon film posteri, dev Totoro karakteri"},
+      {id:88,title:"Grave of the Fireflies",year:1988,genre:"animasyon",imdb:8.5,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Grave+of+the+Fireflies",
+       alt:"Grave of the Fireflies animasyon film posteri, savaşta iki çocuk"},
+      {id:89,title:"Akira",year:1988,genre:"animasyon",imdb:8.0,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Akira",
+       alt:"Akira animasyon film posteri, futuristik motosikletli genç"},
+      {id:90,title:"Ghost in the Shell",year:1995,genre:"animasyon",imdb:8.0,lang:"japanese",
+       image:"https://placehold.co/320x480?text=Ghost+in+the+Shell",
+       alt:"Ghost in the Shell animasyon film posteri, cyborg kadın"},
+
+      {id:91,title:"The Lives of Others",year:2006,genre:"dram",imdb:8.4,lang:"german",
+       image:"https://placehold.co/320x480?text=The+Lives+of+Others",
+       alt:"The Lives of Others film posteri, Doğu Alman gözetleme odası"},
+      {id:92,title:"Das Boot",year:1981,genre:"dram",imdb:8.4,lang:"german",
+       image:"https://placehold.co/320x480?text=Das+Boot",
+       alt:"Das Boot film posteri, Alman denizaltısı içi"},
+      {id:93,title:"Metropolis",year:1927,genre:"bilimkurgu",imdb:8.3,lang:"german",
+       image:"https://placehold.co/320x480?text=Metropolis",
+       alt:"Metropolis film posteri, futuristik şehir ve robot"},
+      {id:94,title:"M",year:1931,genre:"suç",imdb:8.3,lang:"german",
+       image:"https://placehold.co/320x480?text=M",
+       alt:"M film posteri, Peter Lorre korkmuş ifadeyle"},
+      {id:95,title:"The Seventh Seal",year:1957,genre:"fantastik",imdb:8.2,lang:"swedish",
+       image:"https://placehold.co/320x480?text=The+Seventh+Seal",
+       alt:"The Seventh Seal film posteri, şövalye ve ölüm satranç oynarken"},
+      {id:96,title:"Persona",year:1966,genre:"dram",imdb:8.1,lang:"swedish",
+       image:"https://placehold.co/320x480?text=Persona",
+       alt:"Persona film posteri, iki kadın yüzü birleşik"},
+      {id:97,title:"Fanny and Alexander",year:1982,genre:"dram",imdb:8.1,lang:"swedish",
+       image:"https://placehold.co/320x480?text=Fanny+and+Alexander",
+       alt:"Fanny and Alexander film posteri, çocuklar ve büyük ev"},
+      {id:98,title:"Wild Strawberries",year:1957,genre:"dram",imdb:8.1,lang:"swedish",
+       image:"https://placehold.co/320x480?text=Wild+Strawberries",
+       alt:"Wild Strawberries film posteri, yaşlı adam ve genç kadın"},
+      {id:99,title:"The 400 Blows",year:1959,genre:"dram",imdb:8.1,lang:"french",
+       image:"https://placehold.co/320x480?text=The+400+Blows",
+       alt:"The 400 Blows film posteri, genç çocuk koşarken"},
+      {id:100,title:"Breathless",year:1960,genre:"dram",imdb:7.8,lang:"french",
+       image:"https://placehold.co/320x480?text=Breathless",
+       alt:"Breathless film posteri, Jean-Paul Belmondo ve Jean Seberg"},
+
+      {id:101,title:"The Bicycle Thief",year:1948,genre:"dram",imdb:8.3,lang:"italian",
+       image:"https://placehold.co/320x480?text=The+Bicycle+Thief",
+       alt:"The Bicycle Thief film posteri, baba ve oğul bisiklet ararken"},
+      {id:102,title:"8½",year:1963,genre:"dram",imdb:8.0,lang:"italian",
+       image:"https://placehold.co/320x480?text=8+1/2",
+       alt:"8½ film posteri, Federico Fellini'nin yönetmenlik üzerine filmi"},
+      {id:103,title:"La Dolce Vita",year:1960,genre:"dram",imdb:8.0,lang:"italian",
+       image:"https://placehold.co/320x480?text=La+Dolce+Vita",
+       alt:"La Dolce Vita film posteri, Anita Ekberg Trevi Çeşmesi'nde"},
+      {id:104,title:"Stalker",year:1979,genre:"bilimkurgu",imdb:8.1,lang:"russian",
+       image:"https://placehold.co/320x480?text=Stalker",
+       alt:"Stalker film posteri, gizemli bölgeye yolculuk"},
+      {id:105,title:"Solaris",year:1972,genre:"bilimkurgu",imdb:8.1,lang:"russian",
+       image:"https://placehold.co/320x480?text=Solaris",
+       alt:"Solaris film posteri, uzay istasyonu ve gezegen"},
+      {id:106,title:"Mirror",year:1975,genre:"dram",imdb:8.1,lang:"russian",
+       image:"https://placehold.co/320x480?text=Mirror",
+       alt:"Mirror film posteri, Andrei Tarkovsky'nin kişisel filmi"},
+      {id:107,title:"Andrei Rublev",year:1966,genre:"dram",imdb:8.1,lang:"russian",
+       image:"https://placehold.co/320x480?text=Andrei+Rublev",
+       alt:"Andrei Rublev film posteri, Rus ikon ressamı"},
+      {id:108,title:"Come and See",year:1985,genre:"dram",imdb:8.4,lang:"russian",
+       image:"https://placehold.co/320x480?text=Come+and+See",
+       alt:"Come and See film posteri, II. Dünya Savaşı'nda genç çocuk"},
+      {id:109,title:"Battleship Potemkin",year:1925,genre:"dram",imdb:8.0,lang:"russian",
+       image:"https://placehold.co/320x480?text=Battleship+Potemkin",
+       alt:"Battleship Potemkin film posteri, ünlü merdiven sahnesi"},
+      {id:110,title:"Man with a Movie Camera",year:1929,genre:"belgesel",imdb:8.4,lang:"russian",
+       image:"https://placehold.co/320x480?text=Man+with+a+Movie+Camera",
+       alt:"Man with a Movie Camera film posteri, Sovyet kent yaşamı"},
+
+      {id:111,title:"The Third Man",year:1949,genre:"gerilim",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Third+Man",
+       alt:"The Third Man film posteri, Orson Welles Viyana'da"},
+      {id:112,title:"The Bridge on the River Kwai",year:1957,genre:"dram",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Bridge+on+the+River+Kwai",
+       alt:"The Bridge on the River Kwai film posteri, savaş esirleri ve köprü"},
+      {id:113,title:"Lawrence of Arabia",year:1962,genre:"dram",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Lawrence+of+Arabia",
+       alt:"Lawrence of Arabia film posteri, Peter O'Toole çölde"},
+      {id:114,title:"Doctor Zhivago",year:1965,genre:"dram",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Doctor+Zhivago",
+       alt:"Doctor Zhivago film posteri, Rus devrimi ve aşk hikayesi"},
+      {id:115,title:"Ben-Hur",year:1959,genre:"dram",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Ben-Hur",
+       alt:"Ben-Hur film posteri, at arabası yarışı sahnesi"},
+      {id:116,title:"Gandhi",year:1982,genre:"dram",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Gandhi",
+       alt:"Gandhi film posteri, Ben Kingsley Gandhi rolünde"},
+      {id:117,title:"Amadeus",year:1984,genre:"dram",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Amadeus",
+       alt:"Amadeus film posteri, Mozart ve Salieri"},
+      {id:118,title:"A Clockwork Orange",year:1971,genre:"bilimkurgu",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=A+Clockwork+Orange",
+       alt:"A Clockwork Orange film posteri, gözlerini açmış genç"},
+      {id:119,title:"Full Metal Jacket",year:1987,genre:"dram",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Full+Metal+Jacket",
+       alt:"Full Metal Jacket film posteri, askerler eğitimde"},
+      {id:120,title:"Barry Lyndon",year:1975,genre:"dram",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Barry+Lyndon",
+       alt:"Barry Lyndon film posteri, 18. yüzyıl kostümleri"},
+
+      {id:121,title:"The Deer Hunter",year:1978,genre:"dram",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Deer+Hunter",
+       alt:"The Deer Hunter film posteri, Vietnam Savaşı'ndan dönen askerler"},
+      {id:122,title:"Apocalypse Now",year:1979,genre:"dram",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Apocalypse+Now",
+       alt:"Apocalypse Now film posteri, Martin Sheen ve Marlon Brando"},
+      {id:123,title:"Platoon",year:1986,genre:"dram",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Platoon",
+       alt:"Platoon film posteri, Vietnam ormanında askerler"},
+      {id:124,title:"Taxi Driver",year:1976,genre:"dram",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Taxi+Driver",
+       alt:"Taxi Driver film posteri, Robert De Niro taksici olarak"},
+      {id:125,title:"Raging Bull",year:1980,genre:"dram",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Raging+Bull",
+       alt:"Raging Bull film posteri, boksör Jake LaMotta"},
+      {id:126,title:"Good Will Hunting",year:1997,genre:"dram",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Good+Will+Hunting",
+       alt:"Good Will Hunting film posteri, Matt Damon ve Robin Williams"},
+      {id:127,title:"The King's Speech",year:2010,genre:"dram",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Kings+Speech",
+       alt:"The King's Speech film posteri, Colin Firth kral olarak"},
+      {id:128,title:"Slumdog Millionaire",year:2008,genre:"dram",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Slumdog+Millionaire",
+       alt:"Slumdog Millionaire film posteri, Hindistan'da genç çocuk"},
+      {id:129,title:"The Artist",year:2011,genre:"dram",imdb:7.9,lang:"french",
+       image:"https://placehold.co/320x480?text=The+Artist",
+       alt:"The Artist film posteri, sessiz film dönemi aktörü"},
+      {id:130,title:"Birdman",year:2014,genre:"dram",imdb:7.7,lang:"english",
+       image:"https://placehold.co/320x480?text=Birdman",
+       alt:"Birdman film posteri, Michael Keaton kostümüyle"},
+
+      {id:131,title:"Black Swan",year:2010,genre:"dram",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Black+Swan",
+       alt:"Black Swan film posteri, Natalie Portman bale yaparken"},
+      {id:132,title:"The Wrestler",year:2008,genre:"dram",imdb:7.9,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Wrestler",
+       alt:"The Wrestler film posteri, Mickey Rourke güreşçi olarak"},
+      {id:133,title:"Requiem for a Dream",year:2000,genre:"dram",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Requiem+for+a+Dream",
+       alt:"Requiem for a Dream film posteri, uyuşturucu bağımlıları"},
+      {id:134,title:"Eternal Sunshine of the Spotless Mind",year:2004,genre:"dram",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Eternal+Sunshine",
+       alt:"Eternal Sunshine of the Spotless Mind film posteri, Jim Carrey ve Kate Winslet"},
+      {id:135,title:"Her",year:2013,genre:"dram",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Her",
+       alt:"Her film posteri, Joaquin Phoenix ve yapay zeka ilişkisi"},
+      {id:136,title:"Lost in Translation",year:2003,genre:"dram",imdb:7.7,lang:"english",
+       image:"https://placehold.co/320x480?text=Lost+in+Translation",
+       alt:"Lost in Translation film posteri, Bill Murray ve Scarlett Johansson Tokyo'da"},
+      {id:137,title:"The Big Lebowski",year:1998,genre:"komedi",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Big+Lebowski",
+       alt:"The Big Lebowski film posteri, Jeff Bridges karakteri The Dude"},
+      {id:138,title:"Fargo",year:1996,genre:"suç",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Fargo",
+       alt:"Fargo film posteri, karlı ortam ve cinayet"},
+      {id:139,title:"No Country for Old Men",year:2007,genre:"suç",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=No+Country+for+Old+Men",
+       alt:"No Country for Old Men film posteri, Javier Bardem tuhaf saçlı"},
+      {id:140,title:"There Will Be Blood",year:2007,genre:"dram",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=There+Will+Be+Blood",
+       alt:"There Will Be Blood film posteri, Daniel Day-Lewis petrol kuyusu önünde"},
+
+      {id:141,title:"The Revenant",year:2015,genre:"dram",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Revenant",
+       alt:"The Revenant film posteri, Leonardo DiCaprio karda sürünürken"},
+      {id:142,title:"Django Unchained",year:2012,genre:"dram",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Django+Unchained",
+       alt:"Django Unchained film posteri, Jamie Foxx ve Christoph Waltz"},
+      {id:143,title:"Inglourious Basterds",year:2009,genre:"dram",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Inglourious+Basterds",
+       alt:"Inglourious Basterds film posteri, II. Dünya Savaşı'nda askerler"},
+      {id:144,title:"Pulp Fiction",year:1994,genre:"suç",imdb:8.9,lang:"english",
+       image:"https://placehold.co/320x480?text=Pulp+Fiction",
+       alt:"Pulp Fiction film posteri, John Travolta ve Samuel L. Jackson"},
+      {id:145,title:"Reservoir Dogs",year:1992,genre:"suç",imdb:8.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Reservoir+Dogs",
+       alt:"Reservoir Dogs film posteri, takım elbiseli suçlular"},
+      {id:146,title:"Kill Bill: Vol. 1",year:2003,genre:"aksiyon",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Kill+Bill+Vol+1",
+       alt:"Kill Bill: Vol. 1 film posteri, Uma Thurman kılıçlı"},
+      {id:147,title:"Kill Bill: Vol. 2",year:2004,genre:"aksiyon",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Kill+Bill+Vol+2",
+       alt:"Kill Bill: Vol. 2 film posteri, Uma Thurman dövüş pozisyonunda"},
+      {id:148,title:"Sin City",year:2005,genre:"suç",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Sin+City",
+       alt:"Sin City film posteri, çizgi roman tarzı noir görüntüler"},
+      {id:149,title:"300",year:2006,genre:"aksiyon",imdb:7.6,lang:"english",
+       image:"https://placehold.co/320x480?text=300",
+       alt:"300 film posteri, Spartalı savaşçılar"},
+      {id:150,title:"Watchmen",year:2009,genre:"aksiyon",imdb:7.6,lang:"english",
+       image:"https://placehold.co/320x480?text=Watchmen",
+       alt:"Watchmen film posteri, süper kahramanlar grup halinde"},
+
+      {id:151,title:"V for Vendetta",year:2005,genre:"aksiyon",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=V+for+Vendetta",
+       alt:"V for Vendetta film posteri, Guy Fawkes maskeli karakter"},
+      {id:152,title:"The Dark Knight Rises",year:2012,genre:"aksiyon",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Dark+Knight+Rises",
+       alt:"The Dark Knight Rises film posteri, Batman ve Bane"},
+      {id:153,title:"Batman Begins",year:2005,genre:"aksiyon",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Batman+Begins",
+       alt:"Batman Begins film posteri, Christian Bale Batman olarak"},
+      {id:154,title:"Iron Man",year:2008,genre:"aksiyon",imdb:7.9,lang:"english",
+       image:"https://placehold.co/320x480?text=Iron+Man",
+       alt:"Iron Man film posteri, Robert Downey Jr. zırh içinde"},
+      {id:155,title:"The Avengers",year:2012,genre:"aksiyon",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Avengers",
+       alt:"The Avengers film posteri, tüm süper kahramanlar bir arada"},
+      {id:156,title:"Guardians of the Galaxy",year:2014,genre:"aksiyon",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Guardians+of+the+Galaxy",
+       alt:"Guardians of the Galaxy film posteri, renkli uzay ekibi"},
+      {id:157,title:"Black Panther",year:2018,genre:"aksiyon",imdb:7.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Black+Panther",
+       alt:"Black Panther film posteri, Chadwick Boseman Black Panther olarak"},
+      {id:158,title:"Logan",year:2017,genre:"aksiyon",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Logan",
+       alt:"Logan film posteri, Hugh Jackman yaşlı Wolverine olarak"},
+      {id:159,title:"X-Men: Days of Future Past",year:2014,genre:"aksiyon",imdb:8.0,lang:"english",
+       image:"https://placehold.co/320x480?text=X-Men+Days+of+Future+Past",
+       alt:"X-Men: Days of Future Past film posteri, geçmiş ve gelecekteki X-Men"},
+      {id:160,title:"Spider-Man 2",year:2004,genre:"aksiyon",imdb:7.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Spider-Man+2",
+       alt:"Spider-Man 2 film posteri, Tobey Maguire Spider-Man olarak"},
+
+      {id:161,title:"Spider-Man: No Way Home",year:2021,genre:"aksiyon",imdb:8.2,lang:"english",
+       image:"https://placehold.co/320x480?text=Spider-Man+No+Way+Home",
+       alt:"Spider-Man: No Way Home film posteri, üç Spider-Man bir arada"},
+      {id:162,title:"The Batman",year:2022,genre:"aksiyon",imdb:7.9,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Batman",
+       alt:"The Batman film posteri, Robert Pattinson Batman olarak"},
+      {id:163,title:"Joker",year:2019,genre:"dram",imdb:8.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Joker",
+       alt:"Joker film posteri, Joaquin Phoenix Joker olarak"},
+      {id:164,title:"The Suicide Squad",year:2021,genre:"aksiyon",imdb:7.2,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Suicide+Squad",
+       alt:"The Suicide Squad film posteri, kötü karakterler ekibi"},
+      {id:165,title:"Shazam!",year:2019,genre:"aksiyon",imdb:7.0,lang:"english",
+       image:"https://placehold.co/320x480?text=Shazam",
+       alt:"Shazam! film posteri, çocuk süper kahramana dönüşmüş"},
+      {id:166,title:"Wonder Woman",year:2017,genre:"aksiyon",imdb:7.4,lang:"english",
+       image:"https://placehold.co/320x480?text=Wonder+Woman",
+       alt:"Wonder Woman film posteri, Gal Gadot Wonder Woman olarak"},
+      {id:167,title:"Man of Steel",year:2013,genre:"aksiyon",imdb:7.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Man+of+Steel",
+       alt:"Man of Steel film posteri, Henry Cavill Superman olarak"},
+      {id:168,title:"Zack Snyder's Justice League",year:2021,genre:"aksiyon",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Zack+Snyders+Justice+League",
+       alt:"Zack Snyder's Justice League film posteri, süper kahramanlar bir arada"},
+      {id:169,title:"Aquaman",year:2018,genre:"aksiyon",imdb:6.8,lang:"english",
+       image:"https://placehold.co/320x480?text=Aquaman",
+       alt:"Aquaman film posteri, Jason Momoa Aquaman olarak"},
+      {id:170,title:"The Flash",year:2023,genre:"aksiyon",imdb:6.5,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Flash",
+       alt:"The Flash film posteri, Ezra Miller Flash olarak"},
+
+      {id:171,title:"Harry Potter and the Sorcerer's Stone",year:2001,genre:"fantastik",imdb:7.6,lang:"english",
+       image:"https://placehold.co/320x480?text=Harry+Potter+1",
+       alt:"Harry Potter and the Sorcerer's Stone film posteri, genç Harry Potter"},
+      {id:172,title:"Harry Potter and the Deathly Hallows: Part 2",year:2011,genre:"fantastik",imdb:8.1,lang:"english",
+       image:"https://placehold.co/320x480?text=Harry+Potter+8",
+       alt:"Harry Potter and the Deathly Hallows: Part 2 film posteri, final savaşı"},
+      {id:173,title:"The Hobbit: An Unexpected Journey",year:2012,genre:"fantastik",imdb:7.8,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Hobbit+1",
+       alt:"The Hobbit: An Unexpected Journey film posteri, Bilbo Baggins ve cüceler"},
+      {id:174,title:"The Chronicles of Narnia: The Lion, the Witch and the Wardrobe",year:2005,genre:"fantastik",imdb:6.9,lang:"english",
+       image:"https://placehold.co/320x480?text=Narnia+1",
+       alt:"The Chronicles of Narnia film posteri, Aslan ve çocuklar"},
+      {id:175,title:"The Hunger Games",year:2012,genre:"aksiyon",imdb:7.2,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Hunger+Games",
+       alt:"The Hunger Games film posteri, Jennifer Lawrence okçu olarak"},
+      {id:176,title:"Twilight",year:2008,genre:"romantik",imdb:5.3,lang:"english",
+       image:"https://placehold.co/320x480?text=Twilight",
+       alt:"Twilight film posteri, vampir ve insan aşkı"},
+      {id:177,title:"The Fault in Our Stars",year:2014,genre:"romantik",imdb:7.7,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Fault+in+Our+Stars",
+       alt:"The Fault in Our Stars film posteri, genç aşıklar"},
+      {id:178,title:"The Notebook",year:2004,genre:"romantik",imdb:7.8,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Notebook",
+       alt:"The Notebook film posteri, Ryan Gosling ve Rachel McAdams"},
+      {id:179,title:"Titanic",year:1997,genre:"romantik",imdb:7.9,lang:"english",
+       image:"https://placehold.co/320x480?text=Titanic",
+       alt:"Titanic film posteri, Leonardo DiCaprio ve Kate Winslet"},
+      {id:180,title:"The Shape of Water",year:2017,genre:"fantastik",imdb:7.3,lang:"english",
+       image:"https://placehold.co/320x480?text=The+Shape+of+Water",
+       alt:"The Shape of Water film posteri, kadın ve su yaratığı"},
+
+      {id:181,title:"Pan's Labyrinth",year:2006,genre:"fantastik",imdb:8.2,lang:"spanish",
+       image:"https://placehold.co/320x480?text=Pans+Labyrinth",
+       alt:"Pan's Labyrinth film posteri, kız ve fantastik yaratıklar"},
+      {id:182,title:"The Orphanage",year:2007,genre:"gerilim",imdb:7.4,lang:"spanish",
+       image:"https://placehold.co/320x480?text=The+Orphanage",
+       alt:"The Orphanage film posteri, terk edilmiş yetimhane"},
+      {id:183,title:"Talk to Her",year:2002,genre:"dram",imdb:7.9,lang:"spanish",
+       image:"https://placehold.co/320x480?text=Talk+to+Her",
+       alt:"Talk to Her film posteri, Pedro Almodóvar'ın filmi"},
+      {id:184,title:"All About My Mother",year:1999,genre:"dram",imdb:7.9,lang:"spanish",
+       image:"https://placehold.co/320x480?text=All+About+My+Mother",
+       alt:"All About My Mother film posteri, kadınların hikayesi"},
+      {id:185,title:"Volver",year:2006,genre:"dram",imdb:7.6,lang:"spanish",
+       image:"https://placehold.co/320x480?text=Volver",
+       alt:"Volver film posteri, Penélope Cruz İspanyol filminde"},
+      {id:186,title:"Y Tu Mamá También",year:2001,genre:"dram",imdb:7.6,lang:"spanish",
+       image:"https://placehold.co/320x480?text=Y+Tu+Mama+Tambien",
+       alt:"Y Tu Mamá También film posteri, iki genç ve olgun kadın"},
+      {id:187,title:"The Secret in Their Eyes",year:2009,genre:"suç",imdb:8.2,lang:"spanish",
+       image:"https://placehold.co/320x480?text=The+Secret+in+Their+Eyes",
+       alt:"The Secret in Their Eyes film posteri, Arjantin yapımı suç draması"},
+      {id:188,title:"Wild Tales",year:2014,genre:"komedi",imdb:8.1,lang:"spanish",
+       image:"https://placehold.co/320x480?text=Wild+Tales",
+       alt:"Wild Tales film posteri, birbirine bağlı öyküler"},
+      {id:189,title:"Roma",year:2018,genre:"dram",imdb:7.7,lang:"spanish",
+       image:"https://placehold.co/320x480?text=Roma",
+       alt:"Roma film posteri, Alfonso Cuarón'ın siyah beyaz filmi"},
+      {id:190,title:"The Platform",year:2019,genre:"bilimkurgu",imdb:7.0,lang:"spanish",
+       image:"https://placehold.co/320x480?text=The+Platform",
+       alt:"The Platform film posteri, dikey hapishane alegorisi"},
+
+      {id:191,title:"The Hunt",year:2012,genre:"dram",imdb:8.3,lang:"danish",
+       image:"https://placehold.co/320x480?text=The+Hunt",
+       alt:"The Hunt film posteri, Mads Mikkelsen yanlış suçlamayla"},
+      {id:192,title:"Another Round",year:2020,genre:"dram",imdb:7.8,lang:"danish",
+       image:"https://placehold.co/320x480?text=Another+Round",
+       alt:"Another Round film posteri, Mads Mikkelsen ve arkadaşları"},
+      {id:193,title:"The Celebration",year:1998,genre:"dram",imdb:8.0,lang:"danish",
+       image:"https://placehold.co/320x480?text=The+Celebration",
+       alt:"The Celebration film posteri, aile sırrı ortaya çıkıyor"},
+      {id:194,title:"Let the Right One In",year:2008,genre:"gerilim",imdb:7.9,lang:"swedish",
+       image:"https://placehold.co/320x480?text=Let+the+Right+One+In",
+       alt:"Let the Right One In film posteri, vampir çocuk ve arkadaşı"},
+      {id:195,title:"The Square",year:2017,genre:"dram",imdb:7.2,lang:"swedish",
+       image:"https://placehold.co/320x480?text=The+Square",
+       alt:"The Square film posteri, sanat dünyası eleştirisi"},
+      {id:196,title:"Force Majeure",year:2014,genre:"dram",imdb:7.2,lang:"swedish",
+       image:"https://placehold.co/320x480?text=Force+Majeure",
+       alt:"Force Majeure film posteri, aile ve çığ tehlikesi"},
+      {id:197,title:"The Worst Person in the World",year:2021,genre:"dram",imdb:7.9,lang:"norwegian",
+       image:"https://placehold.co/320x480?text=The+Worst+Person+in+the+World",
+       alt:"The Worst Person in the World film posteri, genç kadının hayatı"},
+      {id:198,title:"Thelma",year:2017,genre:"gerilim",imdb:7.0,lang:"norwegian",
+       image:"https://placehold.co/320x480?text=Thelma",
+       alt:"Thelma film posteri, gizemli güçleri olan genç kız"},
+      {id:199,title:"Headhunters",year:2011,genre:"suç",imdb:7.5,lang:"norwegian",
+       image:"https://placehold.co/320x480?text=Headhunters",
+       alt:"Headhunters film posteri, iş dünyası ve suç"},
+      {id:200,title:"Trollhunter",year:2010,genre:"fantastik",imdb:6.9,lang:"norwegian",
+       image:"https://placehold.co/320x480?text=Trollhunter",
+       alt:"Trollhunter film posteri, Norveç'te troll avcısı"}
+    ];
+
+    const filmListEl = document.getElementById('film-list');
+    const filters = {
+      genre: document.getElementById('filter-genre'),
+      year: document.getElementById('filter-year'),
+      rating: document.getElementById('filter-rating'),
+      language: document.getElementById('filter-language'),
+      sort: document.getElementById('filter-sort'),
+    };
+
+    function filterAndSortFilms() {
+      let filtered = films.slice();
+
+      // Tür filtresi
+      const genre = filters.genre.value;
+      if (genre !== 'all') {
+        filtered = filtered.filter(f => f.genre === genre);
+      }
+
+      // Yıl filtresi
+      const year = filters.year.value;
+      if (year !== 'all') {
+        filtered = filtered.filter(f => {
+          if (year === '2020s') return f.year >= 2020 && f.year <= 2023;
+          if (year === '2010s') return f.year >= 2010 && f.year <= 2019;
+          if (year === '2000s') return f.year >= 2000 && f.year <= 2009;
+          if (year === '1990s') return f.year >= 1990 && f.year <= 1999;
+          if (year === '1980s') return f.year >= 1980 && f.year <= 1989;
+          if (year === '1970s') return f.year >= 1970 && f.year <= 1979;
+          if (year === '1960s') return f.year >= 1960 && f.year <= 1969;
+          if (year === 'older') return f.year < 1960;
+          return true;
+        });
+      }
+
+      // IMDb puanı filtresi
+      const rating = filters.rating.value;
+      if (rating !== 'all') {
+        const ratingNum = parseFloat(rating);
+        filtered = filtered.filter(f => f.imdb >= ratingNum);
+      }
+
+      // Dil filtresi
+      const language = filters.language.value;
+      if (language !== 'all') {
+        filtered = filtered.filter(f => f.lang === language);
+      }
+
+      // Sıralama
+      const sort = filters.sort.value;
+      switch(sort) {
+        case 'imdb-desc':
+          filtered.sort((a,b) => b.imdb - a.imdb);
+          break;
+        case 'imdb-asc':
+          filtered.sort((a,b) => a.imdb - b.imdb);
+          break;
+        case 'year-desc':
+          filtered.sort((a,b) => b.year - a.year);
+          break;
+        case 'year-asc':
+          filtered.sort((a,b) => a.year - b.year);
+          break;
+        case 'title-asc':
+          filtered.sort((a,b) => a.title.localeCompare(b.title));
+          break;
+        case 'title-desc':
+          filtered.sort((a,b) => b.title.localeCompare(a.title));
+          break;
+      }
+
+      renderFilms(filtered);
+    }
+
+    function renderFilms(filmsToRender) {
+      filmListEl.innerHTML = '';
+      if (filmsToRender.length === 0) {
+        filmListEl.innerHTML = '<p>Filtrelerinize uygun film bulunamadı.</p>';
+        return;
+      }
+
+      filmsToRender.forEach(film => {
+        const card = document.createElement('article');
+        card.className = 'film-card';
+        card.setAttribute('role', 'listitem');
+        card.tabIndex = 0;
+
+        card.innerHTML = `
+          <img src="${film.image}" alt="${film.alt}" class="film-thumb" />
+          <div class="film-info">
+            <h2 class="film-title">${film.title}</h2>
+            <p class="film-year">${film.year}</p>
+            <div class="film-rating" aria-label="IMDb puanı: ${film.imdb}">
+              ${starSVG(film.imdb)}
+              <span>${film.imdb.toFixed(1)}</span>
+            </div>
+          </div>
+        `;
+
+        filmListEl.appendChild(card);
+      });
+    }
+
+    // Yıldız simgesi SVG'si
+    function starSVG(rating) {
+      // Basit: Her film için 5 yıldız, tam yıldız sayısı yuvarlanmış rating / 2
+      // Burada daha detaylı olabiliriz ama basit tutalım.
+      const fullStars = Math.floor(rating / 2);
+      const halfStar = rating % 2 >= 1 ? 1 : 0;
+      let stars = '';
+      for (let i = 0; i < fullStars; i++) {
+        stars += `<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+      }
+      if (halfStar) {
+        stars += `<svg aria-hidden="true" viewBox="0 0 24 24"><defs><linearGradient id="half-grad"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path fill="url(#half-grad)" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z"/></svg>`;
+      }
+      for (let i = fullStars + halfStar; i < 5; i++) {
+        stars += `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+      }
+      return stars;
+    }
+
+    // Filtrelerin değişimini dinle
+    Object.values(filters).forEach(select => {
+      select.addEventListener('change', filterAndSortFilms);
+    });
+
+    // Sayfa yüklendiğinde göster
+    filterAndSortFilms();
+
+  </script>
+</body>
+</html>
